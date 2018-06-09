@@ -109,7 +109,8 @@ protected:
 
 	virtual bool initAVSynchronizer();
 
-	bool userCancelled; //用户取消拉流
+	// 用户取消拉流
+	bool userCancelled;
 
 	pthread_t initThreadThreadId;
 

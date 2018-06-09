@@ -62,7 +62,7 @@ typedef struct {
 #define DECODER_HEADER_FORCE_FPS			"header_force_fps"
 
 /**
- * 视频解码
+ * 视频解码  基类
  */
 class VideoDecoder {
 protected:
