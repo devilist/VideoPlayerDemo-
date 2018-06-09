@@ -3,14 +3,16 @@
 
 #include "texture_frame_uploader.h"
 
-class YUVTextureFrameUploader: public TextureFrameUploader {
+class YUVTextureFrameUploader : public TextureFrameUploader {
 public:
-	YUVTextureFrameUploader();
-	virtual ~YUVTextureFrameUploader();
+    YUVTextureFrameUploader();
+
+    virtual ~YUVTextureFrameUploader();
 
 protected:
-	virtual bool initialize();
-	virtual void destroy();
+    virtual bool initialize();
+
+    virtual void destroy();
 };
 
 #endif // YUV_TEXTURE_FRAME_UPLOADER_H

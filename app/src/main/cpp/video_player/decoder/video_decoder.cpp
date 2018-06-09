@@ -73,8 +73,9 @@ int VideoDecoder::openFile(DecoderRequestHeader *requestHeader) {
     }
     long long startTimeMills = currentTimeMills();
     int errorCode = openInput();
-//	LOGI("openInput [%s] waste TimeMills is %d", requestHeader->getURI(), (int )(currentTimeMills() - startTimeMills));
-    //现在 pFormatCtx->streams 中已经有所有流了，因此现在我们遍历它找出对应的视频流、音频流、字幕流等：
+    LOGI("openInput [%s] waste TimeMills is %d", requestHeader->getURI(),
+         (int) (currentTimeMills() - startTimeMills));
+    // 现在 pFormatCtx->streams 中已经有所有流了，因此现在我们遍历它找出对应的视频流、音频流、字幕流等：
     if (errorCode > 0) {
         if (isNeedBuriedPoint) {
             long long curTime = currentTimeMills();
@@ -212,7 +213,7 @@ bool VideoDecoder::isNeedRetry() {
 }
 
 int VideoDecoder::openInput() {
-//	LOGI("VideoDecoder::openInput");
+    LOGI("VideoDecoder::openInput");
     char *videoSourceURI = requestHeader->getURI();
     int *max_analyze_durations = requestHeader->getMaxAnalyzeDurations();
     int analyzeDurationSize = requestHeader->getAnalyzeCnt();
@@ -242,11 +243,12 @@ int VideoDecoder::openInput() {
     }
     this->initAnalyzeDurationAndProbesize(max_analyze_durations, analyzeDurationSize, probesize,
                                           fpsProbeSizeConfigured);
-//	LOGI("pFormatCtx->max_analyze_duration is %d", pFormatCtx->max_analyze_duration);
-//	LOGI("pFormatCtx->probesize is %d", pFormatCtx->probesize);
-    //获取文件中的流信息，此函数会读取packet，并确定文件中所有的流信息  设置pFormatCtx->streams指向文件中的流，但此函数并不会改变文件指针，读取的packet会给后面的解码进行处理
+    LOGI("pFormatCtx->max_analyze_duration is %d", pFormatCtx->max_analyze_duration);
+    LOGI("pFormatCtx->probesize is %d", pFormatCtx->probesize);
+    //获取文件中的流信息，此函数会读取packet，并确定文件中所有的流信息
+    // 设置pFormatCtx->streams指向文件中的流，但此函数并不会改变文件指针，读取的packet会给后面的解码进行处理
     if (avformat_find_stream_info(pFormatCtx, NULL) < 0) {
-//		avformat_close_input(&pFormatCtx);
+        avformat_close_input(&pFormatCtx);
         LOGI("Video decoder Stream info not found...");
         return -1;
     }

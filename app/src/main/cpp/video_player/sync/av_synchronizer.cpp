@@ -129,11 +129,12 @@ FrameTexture *AVSynchronizer::getFirstRenderTexture() {
 }
 
 int AVSynchronizer::fillAudioData(byte *outData, int bufferSize) {
-//	LOGI("enter AVSynchronizer::fillAudioData... buffered is %d", buffered);
+    LOGI("enter AVSynchronizer::fillAudioData... buffered is %d", buffered);
     this->signalDecodeThread();
     this->checkPlayState();
     if (buffered) {
-//		LOGI("fillAudioData if(buffered) circleFrameTextureQueue->getValidSize() %d", circleFrameTextureQueue->getValidSize());
+        LOGI("fillAudioData if(buffered) circleFrameTextureQueue->getValidSize() %d",
+             circleFrameTextureQueue->getValidSize());
         memset(outData, 0, bufferSize);
         return bufferSize;
     }
@@ -142,7 +143,7 @@ int AVSynchronizer::fillAudioData(byte *outData, int bufferSize) {
         if (NULL == currentAudioFrame) {
             pthread_mutex_lock(&audioFrameQueueMutex);
             int count = audioFrameQueue->size();
-//			LOGI("audioFrameQueue->size() is %d", count);
+            LOGI("audioFrameQueue->size() is %d", count);
             if (count > 0) {
                 AudioFrame *frame = audioFrameQueue->front();
                 bufferedDuration -= frame->duration;
@@ -183,21 +184,22 @@ int AVSynchronizer::fillAudioData(byte *outData, int bufferSize) {
             break;
         }
     }
-//	LOGI("leave AVSynchronizer::fillAudioData...");
+    LOGI("leave AVSynchronizer::fillAudioData...");
     return needBufferSize - bufferSize;
 }
 
+// 初始化audioQueue与videoQueue
 void AVSynchronizer::initCircleQueue(int videoWidth, int videoHeight) {
-    // 初始化audioQueue与videoQueue
+    // 帧率
     float fps = decoder->getVideoFPS();
 
-//	LOGI("decoder->getVideoFPS() is %.3f maxBufferedDuration is %.3f", fps, maxBufferedDuration);
+    LOGI("decoder->getVideoFPS() is %.3f maxBufferedDuration is %.3f", fps, maxBufferedDuration);
     //此处修正fps，因为某些平台得到的fps很大，导致计算出来要申请很多的显存，因此，这里做一下限定
     if (fps > 30.0f) {
         fps = 30.0f;
     }
 
-    int queueSize = (maxBufferedDuration + 1.0) * fps;
+    int queueSize =(maxBufferedDuration + 1.0) * fps;
     circleFrameTextureQueue = new CircleFrameTextureQueue(
             "decode frame texture queue");
     circleFrameTextureQueue->init(videoWidth, videoHeight, queueSize);
@@ -348,6 +350,7 @@ bool AVSynchronizer::isHWCodecAvaliable() {
 }
 
 void AVSynchronizer::createDecoderInstance() {
+    // 做了一下兼容
     if (this->isHWCodecAvaliable()) {
         decoder = new MediaCodecVideoDecoder(g_jvm, obj);
     } else {

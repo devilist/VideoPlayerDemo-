@@ -10,33 +10,36 @@
 
 #define INVALID_FRAME_POSITION -1.0
 
-typedef void(*onSignalFrameAvailableCallback)(void* ctx);
+typedef void(*onSignalFrameAvailableCallback)(void *ctx);
 
 typedef struct FrameTexture {
-	GLuint texId;
-	float position;
-	int width;
-	int height;
-	FrameTexture() {
-		texId = 0;
-		position = INVALID_FRAME_POSITION;
-		width = 0;
-		height = 0;
-	}
-	~FrameTexture() {
-		if (texId) {
-			glDeleteTextures(1, &texId);
-		}
-	}
+    GLuint texId;
+    float position;
+    int width;
+    int height;
+
+    FrameTexture() {
+        texId = 0;
+        position = INVALID_FRAME_POSITION;
+        width = 0;
+        height = 0;
+    }
+
+    ~FrameTexture() {
+        if (texId) {
+            glDeleteTextures(1, &texId);
+        }
+    }
 } FrameTexture;
 
 typedef struct FrameTextureNode {
-	FrameTexture *texture;
-	struct FrameTextureNode *next;
-	FrameTextureNode(){
-		texture = NULL;
-		next = NULL;
-	}
+    FrameTexture *texture;
+    struct FrameTextureNode *next;
+
+    FrameTextureNode() {
+        texture = NULL;
+        next = NULL;
+    }
 } FrameTextureNode;
 
 /**
@@ -71,66 +74,73 @@ typedef struct FrameTextureNode {
  */
 class CircleFrameTextureQueue {
 public:
-	/** 在AVSynchronizer中调用 **/
-	CircleFrameTextureQueue(const char* queueNameParam);
-	~CircleFrameTextureQueue();
+    /** 在AVSynchronizer中调用 **/
+    CircleFrameTextureQueue(const char *queueNameParam);
 
-	/** 在Uploader中的EGL Thread中调用 **/
-	void init(int width, int height, int queueSize);
+    ~CircleFrameTextureQueue();
 
-	/**
-	 * 当视频解码器解码出一帧视频
-	 * 	1、锁住pushCursor所在的FrameTexture;
-	 * 	2、客户端自己向FrameTexture做拷贝或者上传纹理操作
-	 * 	3、解锁pushCursor所在的FrameTexture并且移动
-	 */
-	FrameTexture* lockPushCursorFrameTexture();
-	void unLockPushCursorFrameTexture();
+    /** 在Uploader中的EGL Thread中调用 **/
+    void init(int width, int height, int queueSize);
 
-	/**
-	 * return < 0 if aborted,
-	 * 			0 if no packet
-	 *		  > 0 if packet.
-	 */
-	int front(FrameTexture **frameTexture);
-	int pop();
-	/** 清空queue **/
-	void clear();
-	/** 获取queue中有效的数据参数 **/
-	int getValidSize();
+    /**
+     * 当视频解码器解码出一帧视频
+     * 	1、锁住pushCursor所在的FrameTexture;
+     * 	2、客户端自己向FrameTexture做拷贝或者上传纹理操作
+     * 	3、解锁pushCursor所在的FrameTexture并且移动
+     */
+    FrameTexture *lockPushCursorFrameTexture();
 
-	void abort();
+    void unLockPushCursorFrameTexture();
 
-	bool getAvailable() {
-		return isAvailable;
-	}
+    /**
+     * return < 0 if aborted,
+     * 			0 if no packet
+     *		  > 0 if packet.
+     */
+    int front(FrameTexture **frameTexture);
 
-	FrameTexture* getFirstFrameFrameTexture();
+    int pop();
 
-	void setIsFirstFrame(bool value);
+    /** 清空queue **/
+    void clear();
 
-	bool getIsFirstFrame();
+    /** 获取queue中有效的数据参数 **/
+    int getValidSize();
+
+    void abort();
+
+    bool getAvailable() {
+        return isAvailable;
+    }
+
+    FrameTexture *getFirstFrameFrameTexture();
+
+    void setIsFirstFrame(bool value);
+
+    bool getIsFirstFrame();
 
 private:
-	FrameTextureNode* head;
-	FrameTextureNode* tail;
-	FrameTextureNode* pullCursor;
-	FrameTextureNode* pushCursor;
-	FrameTexture* firstFrame;
+    FrameTextureNode *head;
+    FrameTextureNode *tail;
+    FrameTextureNode *pullCursor;
+    FrameTextureNode *pushCursor;
+    FrameTexture *firstFrame;
 
-	int queueSize;
-	bool isAvailable;
-	bool mAbortRequest;
-	bool isFirstFrame;
-	pthread_mutex_t mLock;
-	pthread_cond_t mCondition;
-	const char* queueName;
+    int queueSize;
+    bool isAvailable;
+    bool mAbortRequest;
+    bool isFirstFrame;
+    pthread_mutex_t mLock;
+    pthread_cond_t mCondition;
+    const char *queueName;
 
-	void flush();
-	FrameTexture* buildFrameTexture(int width, int height, float position);
+    void flush();
 
-	bool checkGlError(const char* op);
-	void buildGPUFrame(FrameTexture* frameTexture, int width, int height);
+    FrameTexture *buildFrameTexture(int width, int height, float position);
+
+    bool checkGlError(const char *op);
+
+    void buildGPUFrame(FrameTexture *frameTexture, int width, int height);
 };
 
 #endif // HW_ENCODER_CIRCLE_TEXTURE_QUEUE_H
