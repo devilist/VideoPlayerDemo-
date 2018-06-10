@@ -199,7 +199,7 @@ void AVSynchronizer::initCircleQueue(int videoWidth, int videoHeight) {
         fps = 30.0f;
     }
 
-    int queueSize =(maxBufferedDuration + 1.0) * fps;
+    int queueSize = (maxBufferedDuration + 1.0) * fps;
     circleFrameTextureQueue = new CircleFrameTextureQueue(
             "decode frame texture queue");
     circleFrameTextureQueue->init(videoWidth, videoHeight, queueSize);
@@ -490,8 +490,9 @@ void AVSynchronizer::decodeFrames() {
     }
 }
 
+//开启解码线程
 void AVSynchronizer::initDecoderThread() {
-//	LOGI("AVSynchronizer::initDecoderThread ...");
+    LOGI("AVSynchronizer::initDecoderThread ...");
     if (isDestroyed) {
         return;
     }

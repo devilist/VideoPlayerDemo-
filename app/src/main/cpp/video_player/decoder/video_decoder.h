@@ -207,18 +207,18 @@ public:
 
     void signalDecodeThread();
 
-    /** 打开网络文件需要传递 探针的参数以及重试策略 **/
+    /* 打开网络文件 需要传递探针的参数以及重试策略 */
     virtual int openFile(DecoderRequestHeader *requestHeader);
 
-    /** 如果打开视频流成功，那么启动decoder的uploader部分 **/
+    /* 如果打开视频流成功，那么启动decoder的uploader部分 */
     void startUploader(UploaderCallback *pUploaderCallback);
 
-    /** 解码足够长度的视频和音频frame **/
+    /* 解码足够长度的视频和音频frame */
     std::list<MovieFrame *> *decodeFrames(float minDuration);
 
     std::list<MovieFrame *> *decodeFrames(float minDuration, int *decodeVideoErrorState);
 
-    //仅仅解码一帧视频帧
+    // 仅仅解码一帧视频帧
     bool decodeVideoTexIdByPosition(float position);
 
     bool hasSeekReq() {
@@ -256,7 +256,7 @@ public:
         return isSubscribe;
     };
 
-    /** 关于超时的设置 **/
+    /* 关于超时的设置 */
     static int interrupt_cb(void *ctx);
 
     int detectInterrupted();
@@ -287,18 +287,18 @@ public:
         return subtitleStreamIndex != -1;
     };
 
-    /** 设置到播放到什么位置，单位是秒，但是后边3位小数，其实是精确到毫秒 **/
+    /* 设置到播放到什么位置，单位是秒，但是后边3位小数，其实是精确到毫秒 */
     void setPosition(float seconds);
 
-    /** 关闭文件 **/
+    /* 关闭文件 */
     void closeFile();
 
-    /** 当前解码到什么位置了，单位是秒，但是后边3位小数，其实是精确到毫秒 **/
+    /* 当前解码到什么位置了，单位是秒，但是后边3位小数，其实是精确到毫秒 */
     float getPosition() {
         return position;
     };
 
-    /** 当前源的大小，单位是秒，但是后边3位小数，其实是精确到毫秒 **/
+    /* 当前源的大小，单位是秒，但是后边3位小数，其实是精确到毫秒 */
     float getDuration() {
         if (!pFormatCtx) {
             return 0;
@@ -309,7 +309,7 @@ public:
         return (float) pFormatCtx->duration / AV_TIME_BASE;
     };
 
-    /** 获得视频帧的宽度 **/
+    /* 获得视频帧的宽度 */
     int getVideoRotateHint() {
         return degress;
     };
@@ -325,7 +325,7 @@ public:
         return fps;
     };
 
-    /** 获得视频帧的高度 **/
+    /* 获得视频帧的高度 */
     int getVideoFrameHeight() {
         if (videoCodecCtx) {
             return videoCodecCtx->height;
@@ -333,7 +333,7 @@ public:
         return -1;
     };
 
-    /** 获得Audio信道的声道数 **/
+    /* 获得Audio信道的声道数 */
     int getAudioChannels() {
         if (audioCodecCtx) {
             return audioCodecCtx->channels;
@@ -341,7 +341,7 @@ public:
         return -1;
     };
 
-    /** 获得Audio信道的采样率 **/
+    /* 获得Audio信道的采样率 */
     int getAudioSampleRate() {
         if (audioCodecCtx) {
             return audioCodecCtx->sample_rate;
@@ -349,11 +349,11 @@ public:
         return -1;
     };
 
-    /** 解码音频 **/
+    /* 解码音频 */
     bool decodeAudioFrames(AVPacket *packet, std::list<MovieFrame *> *result, float &decodedDuration, float minDuration,
                            int *decodeVideoErrorState);
 
-    /** flush音频 **/
+    /* flush音频 */
     void flushAudioFrames(AVPacket *audioPacket, std::list<MovieFrame *> *result, float minDuration,
                           int *decodeVideoErrorState);
 

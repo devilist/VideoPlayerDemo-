@@ -66,26 +66,27 @@ int VideoDecoder::openFile(DecoderRequestHeader *requestHeader) {
 
     // 注册编解码器
     this->initFFMpegContext();
-    if (isNeedBuriedPoint) {
+    if (isNeedBuriedPoint) {  // 埋一些点
         buriedPointStart = currentTimeMills();
         buriedPoint.beginOpen = buriedPointStart;
         buriedPoint.duration = 0.0f;
     }
     long long startTimeMills = currentTimeMills();
+    // 打开文件
     int errorCode = openInput();
     LOGI("openInput [%s] waste TimeMills is %d", requestHeader->getURI(),
          (int) (currentTimeMills() - startTimeMills));
     // 现在 pFormatCtx->streams 中已经有所有流了，因此现在我们遍历它找出对应的视频流、音频流、字幕流等：
     if (errorCode > 0) {
-        if (isNeedBuriedPoint) {
+        if (isNeedBuriedPoint) { // 埋点
             long long curTime = currentTimeMills();
             buriedPoint.successOpen = (curTime - buriedPointStart) / 1000.0f;
             buriedPoint.failOpen = 0.0f;
             buriedPoint.failOpenType = 1;
             LOGI("successOpen is %f", buriedPoint.successOpen);
         }
-        int videoErr = openVideoStream();
-        int audioErr = openAudioStream();
+        int videoErr = openVideoStream();  // 打开视频流
+        int audioErr = openAudioStream();  // 打开音频流
         if (videoErr < 0 && audioErr < 0) {
             errorCode = -1; // both fails
         } else {
@@ -212,6 +213,7 @@ bool VideoDecoder::isNeedRetry() {
     return !hasAllCodecParameters();
 }
 
+// 打开文件
 int VideoDecoder::openInput() {
     LOGI("VideoDecoder::openInput");
     char *videoSourceURI = requestHeader->getURI();
@@ -253,7 +255,7 @@ int VideoDecoder::openInput() {
         return -1;
     }
     is_eof = false;
-    //输出文件的信息，也就是我们在使用ffmpeg时能看到的文件详细信息
+    // 输出文件的信息，也就是我们在使用ffmpeg时能看到的文件详细信息
 //	av_dump_format(pFormatCtx, -1, videoSourceURI, 0);
     if (this->isNeedRetry()) {
         if (isNeedBuriedPoint) {
@@ -325,7 +327,8 @@ int VideoDecoder::openVideoStream(int streamIndex) {
         LOGI("open video codec failed...");
         return -1;
     }
-    //4、分配图像缓存:准备给即将解码的图片分配内存空间 调用 avcodec_alloc_frame 分配帧,videoFrame用于存储解码后的数据
+    //4、分配图像缓存:准备给即将解码的图片分配内存空间 调用 avcodec_alloc_frame 分配帧,
+    // videoFrame用于存储解码后的数据
     videoFrame = avcodec_alloc_frame();
     if (videoFrame == NULL) {
         LOGI("alloc video frame failed...");
@@ -344,8 +347,8 @@ int VideoDecoder::openVideoStream(int streamIndex) {
         fps = 24.0f;
     }
     LOGI("video codec size: fps: %.3f tb: %f", fps, videoTimeBase);
-//	LOGI("video start time %f", videoStream->start_time * videoTimeBase);
-//	LOGI("video disposition %d", videoStream->disposition);
+    LOGI("video start time %f", videoStream->start_time * videoTimeBase);
+    LOGI("video disposition %d", videoStream->disposition);
     LOGI("videoCodecCtx->pix_fmt is %d {%d, %d}", videoCodecCtx->pix_fmt, AV_PIX_FMT_YUV420P, AV_PIX_FMT_YUVJ420P);
     if (videoCodecCtx->pix_fmt != AV_PIX_FMT_YUV420P && videoCodecCtx->pix_fmt != AV_PIX_FMT_YUVJ420P) {
         LOGI("NOW we only surpport Format is regular YUV we can render it to OpenGL");
