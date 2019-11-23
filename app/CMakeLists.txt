@@ -18,7 +18,7 @@ add_definitions("
 -DGL_GLEXT_PROTOTYPES
 -DEGL_EGLEXT_PROTOTYPES
 ")
-
+add_compile_options(-w)  #不显示编译警告
 ADD_SUBDIRECTORY(src/main/cpp)
 
 include_directories(BEFORE ${PATH_TO_THIRDPARTY}/ffmpeg/include/)
