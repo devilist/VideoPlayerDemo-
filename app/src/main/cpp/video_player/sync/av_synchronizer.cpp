@@ -364,8 +364,9 @@ void AVSynchronizer::initMeta() {
     this->syncMaxTimeDiff = LOCAL_AV_SYNC_MAX_TIME_DIFF;
 }
 
+// 开始解码 开启解码线程
 void AVSynchronizer::start() {
-    isOnDecoding = true;
+    isOnDecoding = true; // 做一下标记， 正在解码中
     pauseDecodeThreadFlag = false;
 
     circleFrameTextureQueue->setIsFirstFrame(true);
@@ -400,11 +401,13 @@ bool AVSynchronizer::addFrames(float thresholdDuration, std::list<MovieFrame *> 
     return !isBufferedDurationIncreasedToThreshold;
 }
 
+// 解码线程回调
 void *AVSynchronizer::startDecoderThread(void *ptr) {
     AVSynchronizer *synchronizer = (AVSynchronizer *) ptr;
 
+    // 进入解码循环
     while (synchronizer->isOnDecoding) {
-        synchronizer->decode();
+        synchronizer->decode();  // 解码
     }
     return 0;
 }
@@ -412,11 +415,12 @@ void *AVSynchronizer::startDecoderThread(void *ptr) {
 void AVSynchronizer::decode() {
     // todo:这里有可能isSeeking开始false，但是期间执行了seekCurrent代码，变成true，就在这里wait住不动了。。。因为音频停止
     // 先假定seek之前已经pause了
-    //			LOGI("before pthread_cond_wait");
+    LOGI("before pthread_cond_wait");
+    // 每一次循环都先把线锁住，等待接收到signal指令后才能进行下一次解码操作
     pthread_mutex_lock(&videoDecoderLock);
     pthread_cond_wait(&videoDecoderCondition, &videoDecoderLock);
     pthread_mutex_unlock(&videoDecoderLock);
-    //			LOGI("after pthread_cond_wait");
+    LOGI("after pthread_cond_wait");
 
     isDecodingFrames = true;
     decodeFrames();
@@ -497,9 +501,11 @@ void AVSynchronizer::initDecoderThread() {
         return;
     }
     isDecodingFrames = false;
+    // 初始化解码线程锁
     pthread_mutex_init(&videoDecoderLock, NULL);
     pthread_cond_init(&videoDecoderCondition, NULL);
     isInitializeDecodeThread = true;
+    // 创建解码线程，在回调里面进行解码操作
     pthread_create(&videoDecoderThread, NULL, startDecoderThread, this);
 }
 
@@ -509,14 +515,14 @@ void AVSynchronizer::signalDecodeThread() {
         return;
     }
 
-    //如果没有剩余的帧了或者当前缓存的长度大于我们的最小缓冲区长度的时候，就再一次开始解码
+    //如果没有剩余的帧了 或者当前缓存的长度小于于我们的最小缓冲区长度的时候，就再一次开始解码
     bool isBufferedDurationDecreasedToMin = bufferedDuration <= minBufferedDuration ||
                                             (circleFrameTextureQueue->getValidSize() <=
                                              minBufferedDuration * getVideoFPS());
 
     if (!isDestroyed && (decoder->hasSeekReq()) || ((!isDecodingFrames) && isBufferedDurationDecreasedToMin)) {
         int getLockCode = pthread_mutex_lock(&videoDecoderLock);
-        pthread_cond_signal(&videoDecoderCondition);
+        pthread_cond_signal(&videoDecoderCondition); // 发送一个信号
         pthread_mutex_unlock(&videoDecoderLock);
     }
 }

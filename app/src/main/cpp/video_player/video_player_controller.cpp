@@ -57,9 +57,11 @@ bool VideoPlayerController::startAVSynchronizer() {
         return ret;
     }
 
+    // 初始化同步器，在初始化方法里做了 创建解码器，打开文件 等操作
     if (this->initAVSynchronizer()) {
+        // 判断音频流是否有效，有效的话，初始化音频输出模块
         if (synchronizer->validAudio()) {
-            ret = this->initAudioOutput();
+            ret = this->initAudioOutput();  //
         }
     }
     if (ret) {
@@ -67,10 +69,10 @@ bool VideoPlayerController::startAVSynchronizer() {
             ret = false;
         } else {
             isPlaying = true;
-            synchronizer->start();
+            synchronizer->start();    // 开始同步和解码了！
             LOGI("call audioOutput start...");
             if (NULL != audioOutput) {
-                audioOutput->start();
+                audioOutput->start(); //
             }
             LOGI("After call audioOutput start...");
         }
@@ -363,6 +365,7 @@ static void *VideoPlayerController::initThreadCallback(void *myself) {
     VideoPlayerController *controller = (VideoPlayerController *) myself;
     // 执行同步模块，解码
     controller->startAVSynchronizer();
+    // 关闭线程
     pthread_exit(0);
     return 0;
 }
